@@ -7,7 +7,7 @@
      need one, delete the whole section, heading included. Every other section stays. -->
 
 <!-- One sentence under the title: what the app is, for whom.
-     Example: A console app that keeps a store's inventory in a csv file and lets a clerk search it. -->
+     Example: A console app you can track all financial transactions for business or for personal use. 
 
 ## Description of the Project
 

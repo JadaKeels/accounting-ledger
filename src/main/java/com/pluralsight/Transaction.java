@@ -61,10 +61,6 @@ public class Transaction {
         this.amount = amount;
     }
 
-    Override {
-
-    }
-
     @Override
     public String toString() {
         return "Transaction{" +
