@@ -1,25 +1,16 @@
 package com.pluralsight;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Scanner;
 
-/*
- * Capstone skeleton – personal finance tracker.
- * ------------------------------------------------
- * File format  (pipe-delimited)
- *     yyyy-MM-dd|HH:mm:ss|description|vendor|amount
- * A deposit has a positive amount; a payment is stored
- * as a negative amount.
- *
- * TODO: create the Transaction class in this package first.
- *       One object = one line of the file. Decide its fields from
- *       the file format above, add a constructor and getters.
- *       This class does not compile until Transaction exists.
- */
 public class FinancialTracker {
 
     /* ------------------------------------------------------------------
@@ -76,10 +67,50 @@ public class FinancialTracker {
      * • Each line looks like: date|time|description|vendor|amount
      */
     public static void loadTransactions(String fileName) {
+        File file = new File(fileName);
+
+        try {
+            // If file does not exist, create an empty one
+            if (!file.exists()) {
+                file.createNewFile();
+                return; // nothing to load yet
+            }
+
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+
+                // Each line: date|time|description|vendor|amount
+                String[] parts = line.split("\\|");
+                if (parts.length != 5) continue;
+
+                LocalDate date = parseDate(parts[0]);
+                LocalTime time = LocalTime.parse(parts[1], TIME_FMT);
+                String description = parts[2];
+                String vendor = parts[3];
+                double amount = Double.parseDouble(parts[4]);
+
+                Transaction t = new Transaction(date, time, description, vendor, amount);
+                transactions.add(t);
+            }
+
+            reader.close();
+
+            //Sort newest first {date + time descending)
+            transactions.sort(Comparator.comparing(
+                    (Transaction t) -> t.getDate().toString() + " " + t.getTime().toString()).reversed());
+
+        } catch (IOException e) {
+            System.out.println("Error loading transaction: " + e.getMessage());
+        }
+
         // TODO: create file if it does not exist, then read each line,
         //       parse the five fields, build a Transaction object,
         //       and add it to the transactions list.
     }
+
 
     /* ------------------------------------------------------------------
        Add new transactions
