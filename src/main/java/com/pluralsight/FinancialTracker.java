@@ -31,7 +31,7 @@ public class FinancialTracker {
        Main menu
        ------------------------------------------------------------------ */
     public static void main(String[] args) {
-        loadTransactions(FinancialTracker);
+        loadTransactions("transactions.csv");
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -61,11 +61,6 @@ public class FinancialTracker {
        File I/O
        ------------------------------------------------------------------ */
 
-    /**
-     * Load transactions from FILE_NAME.
-     * • If the file doesn’t exist, create an empty one so that future writes succeed.
-     * • Each line looks like: date|time|description|vendor|amount
-     */
     public static void loadTransactions(String fileName) {
         File file = new File(fileName);
 
@@ -79,42 +74,29 @@ public class FinancialTracker {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
 
+            // Each line: date|time|description|vendor|amount
             while ((line = reader.readLine()) != null) {
-                if (line.isBlank()) continue;
-
-                // Each line: date|time|description|vendor|amount
                 String[] parts = line.split("\\|");
-                if (parts.length != 5) continue;
 
-                LocalDate date = LocalDate.parse(parts[0], TIME_FMT);
+                if (parts.length = 5) {
+                LocalDate date = LocalDate.parse(parts[0], DATE_FMT);
                 LocalTime time = LocalTime.parse(parts[1], TIME_FMT);
                 String description = parts[2];
                 String vendor = parts[3];
                 double amount = Double.parseDouble(parts[4]);
 
-                Transaction t = new Transaction(date, time, description, vendor, amount);
-                transactions.add(t);
+                    transactions.add(
+                            new Transaction(date, time, description, vendor, amount)
+                    );
+                }
             }
 
             reader.close();
 
-            //Sort newest first {date + time descending)
-            transactions.sort(
-                    Comparator.comparing(Transaction::getDate)
-                            .thenComparing(Transaction::getTime)
-                            .reversed()
-            );
-
         } catch (IOException e) {
-            System.out.println("Error loading transaction: " + e.getMessage());
+            System.out.println("Error loading transactions: " + e.getMessage());
         }
-
-        // TODO: create file if it does not exist, then read each line,
-        //       parse the five fields, build a Transaction object,
-        //       and add it to the transactions list.
     }
-
-
     /* ------------------------------------------------------------------
        Add new transactions
        ------------------------------------------------------------------ */
@@ -125,9 +107,37 @@ public class FinancialTracker {
      * Validate that the amount entered is positive.
      * Store the amount as-is (positive) and append to the file.
      */
+
     private static void addDeposit(Scanner scanner) {
-        // TODO
-    }
+
+        // prompt for date + time
+        System.out.println("Enter date and time (yyyy-MM-dd HH:mm:ss)");
+        String dateTime = scanner.nextLine();
+
+        String[] parts = dateTime.split(" ");
+        LocalDate date = LocalDate.parse(parts[0]);
+        LocalTime time = LocalTime.parse(parts[1]);
+
+        // Description
+        System.out.println("Description: ");
+        String description = scanner.nextLine();
+
+        //Vendor
+        System.out.println("Vendor: ");
+        String vendor = scanner.nextLine();
+
+        //Amount
+        System.out.println("Amount (positive): ");
+        double amount = Double.parseDouble(scanner.nextLine());
+
+        if (amount <= 0) {
+            System.out.println("Amount must be positive. Deposit canceled.");
+            return;
+        }
+
+        //Save deposit to CSV here
+
+    } // close addDeposit
 
     /**
      * Same prompts as addDeposit.
@@ -162,17 +172,25 @@ public class FinancialTracker {
                 case "H" -> running = false;
                 default -> System.out.println("Invalid option");
             }
-        }
-    }
 
-    /* ------------------------------------------------------------------
+            //Sort newest first {date + time descending)
+            transactions.sort(
+                    Comparator.comparing(Transaction::getDate)
+                            .thenComparing(Transaction::getTime)
+                            .reversed()
+            );
+        }catch(10E xception e){
+            System.out.println("Error loading transaction: " + e.getMessage());
+        }
+    }       // <- method close here
+/* ------------------------------------------------------------------
        Display helpers: show data in neat columns
        ------------------------------------------------------------------ */
-    private static void displayLedger() { /* TODO – print all transactions in column format, newest first */ }
+            private static void displayLedger() { /* TODO – print all transactions in column format, newest first */ }
 
-    private static void displayDeposits() { /* TODO – only amount > 0               */ }
+            private static void displayDeposits() { /* TODO – only amount > 0               */ }
 
-    private static void displayPayments() { /* TODO – only amount < 0               */ }
+            private static void displayPayments() { /* TODO – only amount < 0               */ }
 
     /* ------------------------------------------------------------------
        Reports menu
