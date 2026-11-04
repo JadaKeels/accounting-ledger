@@ -145,9 +145,38 @@ public class FinancialTracker {
      * then converted to a negative amount before storing.
      */
     private static void addPayment(Scanner scanner) {
-        // TODO
-    }
 
+            // prompt for date + time
+            System.out.println("Enter date and time (yyyy-MM-dd HH:mm:ss)");
+            String dateTime = scanner.nextLine();
+
+            String[] parts = dateTime.split(" ");
+            LocalDate date = LocalDate.parse(parts[0]);
+            LocalTime time = LocalTime.parse(parts[1]);
+
+            // Description
+            System.out.println("Description: ");
+            String description = scanner.nextLine();
+
+            // Vendor
+            System.out.println("Vendor: ");
+            String vendor = scanner.nextLine();
+
+            // Amount
+            System.out.println("Amount (positive): ");
+            double amount = Double.parseDouble(scanner.nextLine());
+
+            if (amount <= 0) {
+                System.out.println("Amount must be positive. Payment canceled.");
+                return;
+            }
+
+            // Convert to negative for payment
+            amount = -amount;
+
+            // Save payment to CSV here
+
+        } // close addPayment
     /* ------------------------------------------------------------------
        Ledger menu
        ------------------------------------------------------------------ */
