@@ -31,7 +31,7 @@ public class FinancialTracker {
        Main menu
        ------------------------------------------------------------------ */
     public static void main(String[] args) {
-        loadTransactions(FILE_NAME);
+        loadTransactions(FinancialTracker);
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -86,7 +86,7 @@ public class FinancialTracker {
                 String[] parts = line.split("\\|");
                 if (parts.length != 5) continue;
 
-                LocalDate date = parseDate(parts[0]);
+                LocalDate date = LocalDate.parse(parts[0], TIME_FMT);
                 LocalTime time = LocalTime.parse(parts[1], TIME_FMT);
                 String description = parts[2];
                 String vendor = parts[3];
@@ -99,8 +99,11 @@ public class FinancialTracker {
             reader.close();
 
             //Sort newest first {date + time descending)
-            transactions.sort(Comparator.comparing(
-                    (Transaction t) -> t.getDate().toString() + " " + t.getTime().toString()).reversed());
+            transactions.sort(
+                    Comparator.comparing(Transaction::getDate)
+                            .thenComparing(Transaction::getTime)
+                            .reversed()
+            );
 
         } catch (IOException e) {
             System.out.println("Error loading transaction: " + e.getMessage());
