@@ -347,58 +347,164 @@ private static void sortNewestFirst() {
        ------------------------------------------------------------------ */
     private static void reportsMenu(Scanner scanner) {
         boolean running = true;
+
         while (running) {
+
             System.out.println("Reports");
-            System.out.println("Choose an option:");
-            System.out.println("1) Month To Date");
-            System.out.println("2) Previous Month");
-            System.out.println("3) Year To Date");
-            System.out.println("4) Previous Year");
-            System.out.println("5) Search by Vendor");
-            System.out.println("6) Custom Search");
-            System.out.println("0) Back");
+            // menu code...
 
             String input = scanner.nextLine().trim();
 
             switch (input) {
-                case "1" -> {/* TODO – month-to-date report */ }
-                case "2" -> {/* TODO – previous month report */ }
-                case "3" -> {/* TODO – year-to-date report   */ }
-                case "4" -> {/* TODO – previous year report  */ }
-                case "5" -> {/* TODO – prompt for vendor then report */ }
+                case "1" -> monthToDateReport();
+                case "2" -> previousMonthReport();
+                case "3" -> yearToDateReport();
+                case "4" -> previousYearReport();
+
+                case "5" -> {
+                    System.out.print("Enter vendor name: ");
+                    String vendor = scanner.nextLine();
+                    filterTransactionsByVendor(vendor);
+                }
+
                 case "6" -> customSearch(scanner);
+
                 case "0" -> running = false;
+
                 default -> System.out.println("Invalid option");
             }
         }
-    }
+    }   // <- reportsMenu ends here
 
     /* ------------------------------------------------------------------
        Reporting helpers
        ------------------------------------------------------------------ */
-    private static void filterTransactionsByDate(LocalDate start, LocalDate end) {
-        // TODO – iterate transactions, print those within the range
-    }
+    private static void filterTransactionsByDate(
+            LocalDate start,
+            LocalDate end) {
 
+        sortNewestFirst();
+
+        System.out.printf(
+                "%-12s %-10s %-20s %-20s %10s%n",
+                "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+        for (Transaction transaction : transactions) {
+
+            LocalDate date = transaction.getDate();
+
+            if (!date.isBefore(start) && !date.isAfter(end)) {
+
+                System.out.printf(
+                        "%-12s %-10s %-20s %-20s %10.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount());
+            }
+        }
+    }
     private static void filterTransactionsByVendor(String vendor) {
-        // TODO – iterate transactions, print those with matching vendor
+
+        sortNewestFirst();
+
+        boolean found = false;
+
+        System.out.printf(
+                "%-12s %-10s %-20s %-20s %10s%n",
+                "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+        for (Transaction transaction : transactions) {
+
+            if (transaction.getVendor().equalsIgnoreCase(vendor)) {
+
+                found = true;
+
+                System.out.printf(
+                        "%-12s %-10s %-20s %-20s %10.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount());
+            }
+        }
+
+        if (!found) {
+            System.out.println("No transactions found.");
+        }
     }
 
-    private static void customSearch(Scanner scanner) {
-        // TODO – prompt for any combination of date range, description,
-        //        vendor, and exact amount, then display matches
-    }
+            private static void monthToDateReport() {
+                LocalDate today = LocalDate.now();
+                LocalDate firstDay = today.withDayOfMonth(1);
 
+                filterTransactionsByDate(firstDay, today);
+            }
+
+            private static void previousMonthReport() {
+
+                LocalDate firstDayLastMonth =
+                        LocalDate.now()
+                                .minusMonths(1)
+                                .withDayOfMonth(1);
+
+                LocalDate lastDayLastMonth =
+                        firstDayLastMonth.withDayOfMonth(
+                                firstDayLastMonth.lengthOfMonth());
+
+                filterTransactionsByDate(
+                        firstDayLastMonth,
+                        lastDayLastMonth);
+            }
+
+            private static void yearToDateReport() {
+
+                LocalDate today = LocalDate.now();
+
+                LocalDate firstDayOfYear =
+                        LocalDate.of(today.getYear(), 1, 1);
+
+                filterTransactionsByDate(
+                        firstDayOfYear,
+                        today);
+            }
+
+            private static void previousYearReport() {
+
+                int lastYear =
+                        LocalDate.now().getYear() - 1;
+
+                LocalDate start =
+                        LocalDate.of(lastYear, 1, 1);
+
+                LocalDate end =
+                        LocalDate.of(lastYear, 12, 31);
+
+                filterTransactionsByDate(start, end);
+            }
+
+            private static void customSearch(Scanner scanner) {
+                System.out.println("Custom Search coming soon...");
+            }
     /* ------------------------------------------------------------------
        Utility parsers (you can reuse in many places)
        ------------------------------------------------------------------ */
-    private static LocalDate parseDate(String s) {
-        /* TODO – return LocalDate or null */
-        return null;
-    }
+            private static LocalDate parseDate(String s) {
+                try {
+                    return LocalDate.parse(s);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
 
     private static Double parseDouble(String s) {
-        /* TODO – return Double   or null */
-        return null;
-    }
-}
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return null;
+        }
+    }   // closes parseDouble
+
+}   // closes FinancialTracker class
