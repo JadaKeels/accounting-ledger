@@ -120,13 +120,6 @@ public class FinancialTracker {
        Add new transactions
        ------------------------------------------------------------------ */
 
-    /**
-     * Prompt for ONE date+time string in the format
-     * "yyyy-MM-dd HH:mm:ss", plus description, vendor, amount.
-     * Validate that the amount entered is positive.
-     * Store the amount as-is (positive) and append to the file.
-     */
-
     private static void addDeposit(Scanner scanner) {
 
         // prompt for date + time
@@ -191,12 +184,6 @@ public class FinancialTracker {
             System.out.println("Error saving transaction: " + e.getMessage());
         }
     }
-
-    /**
-     * Same prompts as addDeposit.
-     * Amount must be entered as a positive number,
-     * then converted to a negative amount before storing.
-     */
 
     private static void addPayment(Scanner scanner) {
 
@@ -385,6 +372,8 @@ private static void sortNewestFirst() {
 
         sortNewestFirst();
 
+        boolean found = false;
+
         System.out.printf(
                 "%-12s %-10s %-20s %-20s %10s%n",
                 "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
@@ -395,6 +384,8 @@ private static void sortNewestFirst() {
 
             if (!date.isBefore(start) && !date.isAfter(end)) {
 
+                found = true;
+
                 System.out.printf(
                         "%-12s %-10s %-20s %-20s %10.2f%n",
                         transaction.getDate(),
@@ -403,6 +394,10 @@ private static void sortNewestFirst() {
                         transaction.getVendor(),
                         transaction.getAmount());
             }
+        }
+
+        if (!found) {
+            System.out.println("No transactions found.");
         }
     }
     private static void filterTransactionsByVendor(String vendor) {
@@ -485,9 +480,95 @@ private static void sortNewestFirst() {
                 filterTransactionsByDate(start, end);
             }
 
-            private static void customSearch(Scanner scanner) {
-                System.out.println("Custom Search coming soon...");
+    private static void customSearch(Scanner scanner) {
+
+        System.out.print("Start Date (yyyy-MM-dd): ");
+        String startInput = scanner.nextLine().trim();
+
+        System.out.print("End Date (yyyy-MM-dd): ");
+        String endInput = scanner.nextLine().trim();
+
+        System.out.print("Description: ");
+        String descriptionInput = scanner.nextLine().trim();
+
+        System.out.print("Vendor: ");
+        String vendorInput = scanner.nextLine().trim();
+
+        System.out.print("Amount: ");
+        String amountInput = scanner.nextLine().trim();
+
+        LocalDate startDate =
+                startInput.isEmpty() ? null : parseDate(startInput);
+
+        LocalDate endDate =
+                endInput.isEmpty() ? null : parseDate(endInput);
+
+        Double amount =
+                amountInput.isEmpty() ? null : parseDouble(amountInput);
+
+        sortNewestFirst();
+
+        boolean found = false;
+
+        System.out.printf(
+                "%-12s %-10s %-20s %-20s %10s%n",
+                "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+        for (Transaction transaction : transactions) {
+
+            boolean matches = true;
+
+            // Start Date filter
+            if (startDate != null &&
+                    transaction.getDate().isBefore(startDate)) {
+                matches = false;
             }
+
+            // End Date filter
+            if (endDate != null &&
+                    transaction.getDate().isAfter(endDate)) {
+                matches = false;
+            }
+
+            // Description filter
+            if (!descriptionInput.isEmpty() &&
+                    !transaction.getDescription()
+                            .toLowerCase()
+                            .contains(descriptionInput.toLowerCase())) {
+                matches = false;
+            }
+
+            // Vendor filter
+            if (!vendorInput.isEmpty() &&
+                    !transaction.getVendor()
+                            .equalsIgnoreCase(vendorInput)) {
+                matches = false;
+            }
+
+            // Amount filter
+            if (amount != null &&
+                    transaction.getAmount() != amount) {
+                matches = false;
+            }
+
+            if (matches) {
+
+                found = true;
+
+                System.out.printf(
+                        "%-12s %-10s %-20s %-20s %10.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount());
+            }
+        }
+
+        if (!found) {
+            System.out.println("No transactions found.");
+        }
+    }
     /* ------------------------------------------------------------------
        Utility parsers (you can reuse in many places)
        ------------------------------------------------------------------ */
