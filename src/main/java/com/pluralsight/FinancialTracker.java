@@ -39,7 +39,10 @@ public class FinancialTracker {
 
         while (running) {
 
-            System.out.println("\n========== HOME ==========");
+            System.out.println("\n================================");
+            System.out.println(" Welcome to LedgeCheck  ");
+            System.out.println(" Account Ledger System  ");
+            System.out.println("================================");
             System.out.println("D) Add Deposit");
             System.out.println("P) Make Payment");
             System.out.println("L) Ledger");
