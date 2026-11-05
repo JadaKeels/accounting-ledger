@@ -198,51 +198,53 @@ public class FinancialTracker {
      * then converted to a negative amount before storing.
      */
 
-        private static void addPayment(Scanner scanner) {
+    private static void addPayment(Scanner scanner) {
 
-            // Prompt for date + time
-            System.out.println("Enter date and time (yyyy-MM-dd HH:mm:ss)");
-            String dateTime = scanner.nextLine();
+        // Prompt for date + time
+        System.out.println("Enter date and time (yyyy-MM-dd HH:mm:ss)");
+        String dateTime = scanner.nextLine();
 
-            String[] parts = dateTime.split(" ");
-            LocalDate date = LocalDate.parse(parts[0]);
-            LocalTime time = LocalTime.parse(parts[1]);
+        String[] parts = dateTime.split(" ");
+        LocalDate date = LocalDate.parse(parts[0]);
+        LocalTime time = LocalTime.parse(parts[1]);
 
-            // Description
-            System.out.println("Description:");
-            String description = scanner.nextLine();
+        // Description
+        System.out.println("Description:");
+        String description = scanner.nextLine();
 
-            // Vendor
-            System.out.println("Vendor:");
-            String vendor = scanner.nextLine();
+        // Vendor
+        System.out.println("Vendor:");
+        String vendor = scanner.nextLine();
 
-            // Amount
-            System.out.println("Amount (positive):");
-            double amount = Double.parseDouble(scanner.nextLine());
+        // Amount
+        System.out.println("Amount (positive):");
+        double amount = Double.parseDouble(scanner.nextLine());
 
-            if (amount <= 0) {
-                System.out.println("Amount must be positive. Payment canceled.");
-                return;
-            }
-
-            // Store as negative for a debit
-            amount = -amount;
-
-            saveTransaction(
-                    date,
-                    time,
-                    description,
-                    vendor,
-                    amount
-            );
-
-            System.out.println("Payment saved successfully.");
+        if (amount <= 0) {
+            System.out.println("Amount must be positive. Payment canceled.");
+            return;
         }
+
+        // Store as negative for a debit
+        amount = -amount;
+
+        saveTransaction(
+                date,
+                time,
+                description,
+                vendor,
+                amount
+        );
+
+        System.out.println("Payment saved successfully.");
+    }
+
     /* ------------------------------------------------------------------
        Ledger menu
        ------------------------------------------------------------------ */
     private static void ledgerMenu(Scanner scanner) {
         boolean running = true;
+
         while (running) {
             System.out.println("Ledger");
             System.out.println("Choose an option:");
@@ -262,24 +264,83 @@ public class FinancialTracker {
                 case "H" -> running = false;
                 default -> System.out.println("Invalid option");
             }
+        }
+    }  //
 
-            //Sort newest first {date + time descending)
-            transactions.sort(
-                    Comparator.comparing(Transaction::getDate)
-                            .thenComparing(Transaction::getTime)
-                            .reversed()
-            );
+    private static void displayLedger() {
+
+            sortNewestFirst();
+
+            System.out.printf("%-12s %-10s %-20s %-20s %10s%n",
+                    "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+            for (Transaction transaction : transactions) {
+                System.out.printf("%-12s %-10s %-20s %-20s %10.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount());
+            }
+        }
+
+    private static void displayDeposits() {
+
+        transactions.sort(
+                Comparator.comparing(Transaction::getDate)
+                        .thenComparing(Transaction::getTime)
+                        .reversed()
+        );
+
+        System.out.printf("%-12s %-10s %-20s %-20s %10s%n",
+                "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+        for (Transaction transaction : transactions) {
+
+            if (transaction.getAmount() > 0) {
+
+                System.out.printf("%-12s %-10s %-20s %-20s %10.2f%n",
+                        transaction.getDate(),
+                        transaction.getTime(),
+                        transaction.getDescription(),
+                        transaction.getVendor(),
+                        transaction.getAmount());
+            }
         }
     }
 
-    /* ------------------------------------------------------------------
-       Display helpers: show data in neat columns
-       ------------------------------------------------------------------ */
-        private static void displayLedger() { /* TODO – print all transactions in column format, newest first */ }
+private static void displayPayments() {
 
-        private static void displayDeposits() { /* TODO – only amount > 0               */ }
+    transactions.sort(
+            Comparator.comparing(Transaction::getDate)
+                    .thenComparing(Transaction::getTime)
+                    .reversed()
+    );
 
-        private static void displayPayments() { /* TODO – only amount < 0               */ }
+    System.out.printf("%-12s %-10s %-20s %-20s %10s%n",
+            "DATE", "TIME", "DESCRIPTION", "VENDOR", "AMOUNT");
+
+    for (Transaction transaction : transactions) {
+
+        if (transaction.getAmount() < 0) {
+
+            System.out.printf("%-12s %-10s %-20s %-20s %10.2f%n",
+                    transaction.getDate(),
+                    transaction.getTime(),
+                    transaction.getDescription(),
+                    transaction.getVendor(),
+                    transaction.getAmount());
+        }
+    }
+}
+
+private static void sortNewestFirst() {
+    transactions.sort(
+            Comparator.comparing(Transaction::getDate)
+                    .thenComparing(Transaction::getTime)
+                    .reversed()
+    );
+}
 
     /* ------------------------------------------------------------------
        Reports menu
