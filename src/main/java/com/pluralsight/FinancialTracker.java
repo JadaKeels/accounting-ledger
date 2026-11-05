@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -31,32 +32,50 @@ public class FinancialTracker {
        Main menu
        ------------------------------------------------------------------ */
     public static void main(String[] args) {
-        loadTransactions("transactions.csv");
+        loadTransactions(FILE_NAME);
 
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
         while (running) {
-            System.out.println("Welcome to TransactionApp");
-            System.out.println("Choose an option:");
+
+            System.out.println("\n========== HOME ==========");
             System.out.println("D) Add Deposit");
-            System.out.println("P) Make Payment (Debit)");
+            System.out.println("P) Make Payment");
             System.out.println("L) Ledger");
             System.out.println("X) Exit");
+            System.out.print("Choose an option: ");
 
-            String input = scanner.nextLine().trim();
+            String input = scanner.nextLine().trim().toUpperCase();
 
-            switch (input.toUpperCase()) {
-                case "D" -> addDeposit(scanner);
-                case "P" -> addPayment(scanner);
-                case "L" -> ledgerMenu(scanner);
-                case "X" -> running = false;
-                default -> System.out.println("Invalid option");
+            switch (input) {
+
+                case "D":
+                    addDeposit(scanner);
+                    break;
+
+                case "P":
+                    addPayment(scanner);
+                    break;
+
+                case "L":
+                    ledgerMenu(scanner);
+                    break;
+
+                case "X":
+                    running = false;
+                    System.out.println("Goodbye!");
+                    break;
+
+                default:
+                    System.out.println("Invalid option.");
             }
+
+            // Loop repeats automatically and returns to Home Menu
         }
+
         scanner.close();
     }
-
     /* ------------------------------------------------------------------
        File I/O
        ------------------------------------------------------------------ */
@@ -135,18 +154,53 @@ public class FinancialTracker {
             return;
         }
 
-        //Save deposit to CSV here
+        saveTransaction(
+                date,
+                time,
+                description,
+                vendor,
+                amount
+        );
 
-    } // close addDeposit
+        System.out.println("Deposit saved successfully.");
+    }
+
+    private static void saveTransaction(
+            LocalDate date,
+            LocalTime time,
+            String description,
+            String vendor,
+            double amount) {
+
+        Transaction transaction =
+                new Transaction(date, time, description, vendor, amount);
+
+        transactions.add(transaction);
+
+        try (FileWriter writer = new FileWriter(FILE_NAME, true)) {
+
+            writer.write(
+                    date.format(DATE_FMT) + "|" +
+                            time.format(TIME_FMT) + "|" +
+                            description + "|" +
+                            vendor + "|" +
+                            amount + "\n"
+            );
+
+        } catch (IOException e) {
+            System.out.println("Error saving transaction: " + e.getMessage());
+        }
+    }
 
     /**
      * Same prompts as addDeposit.
      * Amount must be entered as a positive number,
      * then converted to a negative amount before storing.
      */
-    private static void addPayment(Scanner scanner) {
 
-            // prompt for date + time
+        private static void addPayment(Scanner scanner) {
+
+            // Prompt for date + time
             System.out.println("Enter date and time (yyyy-MM-dd HH:mm:ss)");
             String dateTime = scanner.nextLine();
 
@@ -155,15 +209,15 @@ public class FinancialTracker {
             LocalTime time = LocalTime.parse(parts[1]);
 
             // Description
-            System.out.println("Description: ");
+            System.out.println("Description:");
             String description = scanner.nextLine();
 
             // Vendor
-            System.out.println("Vendor: ");
+            System.out.println("Vendor:");
             String vendor = scanner.nextLine();
 
             // Amount
-            System.out.println("Amount (positive): ");
+            System.out.println("Amount (positive):");
             double amount = Double.parseDouble(scanner.nextLine());
 
             if (amount <= 0) {
@@ -171,12 +225,19 @@ public class FinancialTracker {
                 return;
             }
 
-            // Convert to negative for payment
+            // Store as negative for a debit
             amount = -amount;
 
-            // Save payment to CSV here
+            saveTransaction(
+                    date,
+                    time,
+                    description,
+                    vendor,
+                    amount
+            );
 
-        } // close addPayment
+            System.out.println("Payment saved successfully.");
+        }
     /* ------------------------------------------------------------------
        Ledger menu
        ------------------------------------------------------------------ */
